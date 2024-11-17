@@ -1,67 +1,47 @@
-Detecting Pneumonia Using Deep Learning
+# Detecting Pneumonia using Deep Learning
 
--------
+---
 
+## Description
+Pneumonia is a severe lung infection that inflames and fills the air sacs in the lungs with fluid or puss. It's a common illness that affects many people each year in the US and around the world. To diagonose this disease, Radiologists looks for the presence and the severity of infiltrate on patient's chest X-Ray image. However, studies have shown that even experienced radiologists often have a hard time correctly identify whether something is an infiltrate on the X-ray. This causes delays in diagnosis, which increases the disease severity and associated mortality rate. 
 
-Description
-Pneumonia is a severe lung infection that inflames and fills the air sacs in the lungs with fluid or pus. It's a common illness that affects millions of people worldwide. Diagnosing pneumonia involves radiologists analyzing chest X-ray images to detect the presence and severity of the disease. However, studies show that even experienced radiologists often struggle to correctly identify infiltrates on X-rays, leading to delays in diagnosis and increased mortality.
+Can AI help fill in the gap for humans, spotting Pneumonia the way that human's eye aren't able to do? 
 
-Can AI help detect pneumonia in a way that humans might miss?
+## Objective
+Build a deep learning model that detects Pneumonia on patient's chest X-Ray images. 
 
-Objective
-The goal of this project is to build a deep learning model that can accurately detect pneumonia from chest X-ray images.
+## Methodology
+### 1. Data Collection
+Data is obtained from [Kaggle](https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia), which are chest X-Ray images of pediatric patients under age of 5 from a Medical Center in Guangzhou, China. It contains a total of 5,856 images in different sizes. 
 
-Methodology
-1. Data Collection
-Data for this project is sourced from Kaggle: Chest X-Ray Images (Pneumonia), which contains chest X-ray images of pediatric patients (under age 5) from a medical center in Guangzhou, China. The dataset includes 5,856 images with a mix of pneumonia and healthy X-rays.
+### 2. Data Exploring
+As the validation dataset arranged by Kaggle is too small, I've re-split the entire dataset into this ratio: 70% train, 19% validation, and 11% test. The training dataset is distributed as 79% of X-rays has pneumonia and 21% doesn't. 
 
-2. Data Exploration and Splitting
-The Kaggle dataset includes a small validation set, so I re-split the data into a custom train-validation-test ratio:
+### 3. Image Preprocessing
+To ensure efficient computation, **pixels were normalized** to values from 0 to 1. The **images were also augmented** to prevent model from overfitting. Lastly, since a chest X-ray shows the parts of the chest in different shades of black and white based on the amount of radiation the tissue can absorb, it makes sense to decrease the complexity of the model by **converting the images to grayscale** (one color channel). 
 
-Training Set: 70% of the data
-Validation Set: 19% of the data
-Test Set: 11% of the data
-The training data is imbalanced, with 79% labeled as pneumonia and 21% as healthy.
+### 4. Data Modeling
+#### Model Architecture
+The basic structure of a CNN model consists of CNN layer, followed by a pooling layer and an optional dropout, then fully connected layers with activations and output layer. I've tried different combinations of activations, dropout, and batch normalization, and below is the high-level architecture of my final and best performing convolutional neural network (CNN) model.  
 
-3. Image Preprocessing
-Normalization: Image pixel values were scaled to the range [0, 1] to ensure efficient computation.
-Augmentation: To prevent overfitting and increase model robustness, images were augmented.
-Grayscale Conversion: Chest X-ray images were converted to grayscale, reducing complexity and focusing on the most important features.
+![CNN Model](cnn.png)
 
-4. Model Architecture
-A Convolutional Neural Network (CNN) was used for this binary classification task. The model consists of:
+Since this is a binary classification problem, we used ReLU activation to output non-negative values and fed into a sigmoid softmax function that predicts an output probability, which can be converted to class values based on our threshold.
 
-CNN Layers: Extracts features from X-ray images.
-Pooling Layers: Reduces dimensionality.
-Dropout Layers: Prevents overfitting by randomly disabling some neurons during training.
-Fully Connected Layers: Classifies the extracted features into the target classes (pneumonia or healthy).
-The model uses ReLU activation for hidden layers and a Sigmoid activation function in the output layer for binary classification.
+#### Optimize for AUC score
+For the case of Pneumonia, we will aim to have high recall as any delayed diagnosis means that someone may get really sick and potentially lose their life. We do that by first having our model optimize for AUC score, focusing on having a good measure of separability for our binary classification. Then, we can crank the threshold up and down (from 0.5) if the business feels more comfortable with a higher or lower FP or FN. 
 
+## Results
 
-5. Optimization for AUC Score
-Given the critical nature of pneumonia diagnosis, recall is prioritized to minimize false negatives (FN). The model optimizes for AUC score, which is an effective measure of separability in binary classification tasks. The threshold for classification can be adjusted based on the business context to balance false positives (FP) and false negatives (FN).
+### Fit 
+Through each epoch during the learning process, validation loss and training loss approach each other, which means our model doesn’t seem to have much overfitting or underfitting. Moreover, training and validation AUC score also converges to a point where they’re almost equal in the end. 
 
-Results
-Model Performance
-AUC Score: 97.98% – Our model is able to separate pneumonia images from healthy ones with high accuracy.
-Recall: 98.72% – The model has excellent sensitivity, making it reliable for detecting pneumonia cases.
-False Positives: 8.49% – A relatively low rate of healthy X-rays being classified as pneumonia.
-False Negatives: 0.80% – Very few pneumonia cases are missed, ensuring timely detection.
-Training and Evaluation Metrics
-Training Loss and Validation Loss: Show that the model does not overfit, with losses converging as training progresses.
-Training AUC and Validation AUC: Both scores converge, indicating the model performs well on both training and unseen validation data.
-###Workflow
-To replicate or further explore this project, follow the steps below:
+### Metrics
+- The model has an AUC score of 97.98%, indicating that our CNN model can separate 97.98% of the images in the test set. 
+- The model achieves 98.72% for recall, with 8.49% of False Positives and 0.80% of False Negatives, which is impressive and exactly what we’re aiming for. 
 
-Download Dataset
-
-Get the dataset from Kaggle: Chest X-Ray Pneumonia Dataset
-Exploratory Data Analysis (EDA)
-
-Open 01 EDA.ipynb to explore and visualize the dataset.
-Model Training and Evaluation
-
-Open 02 CNN Model.ipynb to train the deep learning model, evaluate its performance, and fine-tune as necessary.
-Results and Conclusion
-
-Check 03 Results_and_Conclusion.ipynb for performance graphs and final conclusions.
+## Workflow
+Follow the jupyter notebook in the order below:
+- 00 Download dataset from [Kaggle](https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia)
+- 01 EDA.ipynb
+- 02 CNN Model.ipynb
