@@ -1,4 +1,4 @@
-# Detecting Pneumonia using Deep Learning
+#  Pneumonia Detecting using Deep Learning
 
 ---
 
